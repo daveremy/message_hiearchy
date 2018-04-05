@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageHierarchy", "MessageHierarchy\MessageHierarchy.csproj", "{EAC68007-5289-4F71-A99E-CE52C2EE4A0F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageHierarchyTests", "MessageHierarchyTests\MessageHierarchyTests.csproj", "{0605AACA-9F71-4398-A029-94CBC36FD46D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{EAC68007-5289-4F71-A99E-CE52C2EE4A0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAC68007-5289-4F71-A99E-CE52C2EE4A0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAC68007-5289-4F71-A99E-CE52C2EE4A0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0605AACA-9F71-4398-A029-94CBC36FD46D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0605AACA-9F71-4398-A029-94CBC36FD46D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0605AACA-9F71-4398-A029-94CBC36FD46D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0605AACA-9F71-4398-A029-94CBC36FD46D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

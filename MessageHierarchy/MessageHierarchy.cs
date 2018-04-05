@@ -12,16 +12,19 @@ public static class MessageHierarchy
         // TODO: Change to get all assemblies (filtering out assemblies that will not have message types)
         var _messageTypes = typeof(MessageHierarchy).Assembly.GetTypes().Where(typeof(Message).IsAssignableFrom);
         TypeTree.BuildTree(_messageTypes);
+        _messageTypes = null;
     }
 
-    public static IEnumerable<Type> Ancestors(Type type)
+    public static IEnumerable<Type> AncestorsAndSelf(Type type)
     {
-        return TypeTree.Ancestors(type);
+        //TODO: Add Ensure that type != null
+        return TypeTree.AncestorsAndSelf(type);
     }
 
-    public static IEnumerable<Type> Descendants(Type type)
+    public static IEnumerable<Type> DescendantsAndSelf(Type type)
     {
-        return TypeTree.Descendants(type);
+        //TODO: Add Ensure that type != null
+        return TypeTree.DescendantsAndSelf(type);
     }
 }
 
@@ -51,7 +54,7 @@ internal class TypeTree
             }
         }
     }
-    internal static IEnumerable<Type> Ancestors(Type type)
+    internal static IEnumerable<Type> AncestorsAndSelf(Type type)
     {
         TypeTreeNode typeNode = _typeToNode[type];
         while (typeNode != null)
@@ -61,7 +64,7 @@ internal class TypeTree
         }
     }
 
-    internal static IEnumerable<Type> Descendants(Type type)
+    internal static IEnumerable<Type> DescendantsAndSelf(Type type)
     {
         // non recursive depth first search
         // Initialize a stack of typeNodes to visit with the type passed in.

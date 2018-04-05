@@ -8,14 +8,14 @@ public static class Program
     public static void Main()
     {
         var type = typeof(Message);
-        Console.WriteLine("MessageChild has " + MessageHierarchy.Ancestors(type).Count() + " Ancestors");
-        foreach (var parent in MessageHierarchy.Ancestors(type))
+        Console.WriteLine("MessageChild has " + MessageHierarchy.AncestorsAndSelf(type).Count() + " Ancestors");
+        foreach (var parent in MessageHierarchy.AncestorsAndSelf(type))
         {
             Console.WriteLine(parent);
         }
 
-        Console.WriteLine($"{type} has {MessageHierarchy.Descendants(type).Count()} Descendants");
-        foreach (var descendant in MessageHierarchy.Descendants(type))
+        Console.WriteLine($"{type} has {MessageHierarchy.DescendantsAndSelf(type).Count()} Descendants");
+        foreach (var descendant in MessageHierarchy.DescendantsAndSelf(type))
         {
             Console.WriteLine(descendant);
         }
