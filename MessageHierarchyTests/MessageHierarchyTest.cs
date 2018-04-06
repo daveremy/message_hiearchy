@@ -53,7 +53,5 @@ namespace MessageHierarchyTests
             Assert.Single(descendants);
             Assert.Contains(typeof(MessageChild), descendants);
         }
-
     }
-
 }

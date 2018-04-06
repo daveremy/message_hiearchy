@@ -2,37 +2,112 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 
+/// <summary>
+/// The hierarchy of types inheriting from the Message Type.  
+/// </summary>
 public static class MessageHierarchy
 {
+    public static EventHandler MessageTypesAdded;
     static MessageHierarchy()
     {
-        // Get the all of the types in the Assembly that are derived from Message
-        // TODO: Change to GetLoadableTypes rather than direct GetTypes()
-        // TODO: Change to get all assemblies (filtering out assemblies that will not have message types)
-        var _messageTypes = typeof(MessageHierarchy).Assembly.GetTypes().Where(typeof(Message).IsAssignableFrom);
-        TypeTree.BuildTree(_messageTypes);
-        _messageTypes = null;
+        // Get the all of the types in the Assembly that are derived from Message and then build a 
+        // backing TypeTree.
+        // TODO: Put in timing logging
+        TypeTree.BuildTree(GetTypesDerivedFrom(typeof(Message)));
+        AppDomain.CurrentDomain.AssemblyLoad += AssemblyLoadEventHandler;
     }
 
     public static IEnumerable<Type> AncestorsAndSelf(Type type)
     {
-        //TODO: Add Ensure that type != null
+        if (type == null) throw new ArgumentNullException(nameof(type));
         return TypeTree.AncestorsAndSelf(type);
     }
 
     public static IEnumerable<Type> DescendantsAndSelf(Type type)
     {
-        //TODO: Add Ensure that type != null
+        if (type == null) throw new ArgumentNullException(nameof(type));
         return TypeTree.DescendantsAndSelf(type);
+    }
+
+    private static void AssemblyLoadEventHandler(object sender, AssemblyLoadEventArgs args)
+    {
+        // TODO: Comment on this if condition.
+        if (!args.LoadedAssembly.IsDynamic && args.LoadedAssembly.Location.Contains(AppDomain.CurrentDomain.BaseDirectory))
+        {
+            TypeTree.ResetTypeTree(GetTypesDerivedFrom(typeof(Message)));
+            MessageTypesAdded(null, null);
+        }
+    }
+
+    private static List<Type> GetTypesDerivedFrom(Type rootType)
+    {
+        // Get all the derived types from loaded assemblies (with some systems assemblies
+        // filtered out).  
+        var derivedTypes = new List<Type>();
+        foreach(var assembly in FilteredAssemblies())
+        {
+            // TODO: Filter already processed assemblies (known assemblies?)
+            foreach (var subType in assembly.GetLoadableTypes().Where(rootType.IsAssignableFrom))
+            {
+                derivedTypes.Add(subType);
+            }
+        }
+        return derivedTypes;
+    }
+
+    private static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+    {
+        // See https://stackoverflow.com/questions/7889228/how-to-prevent-reflectiontypeloadexception-when-calling-assembly-gettypes
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException e)
+        {
+            return e.Types.Where(t => t != null);
+        }
+    }
+
+    private static string[] ExcludedAssemblies =
+    {
+        "mscorlib",
+        "System.Core",
+        "System",
+        "System.Xml",
+        "Microsoft.VisualStudio.Debugger.Runtime",
+        "Telerik"
+    };
+    private static IEnumerable<Assembly> FilteredAssemblies()
+    {
+        // Filter own assemblies that we know won't have usertypes
+        return AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => !ExcludedAssemblies.Any(excluded => a.FullName.StartsWith(excluded + ",")));
     }
 }
 
-internal class TypeTree
+internal static class TypeTree
 {
     private static TypeTreeNode _root;
     private static Dictionary<Type, TypeTreeNode> _typeToNode = new Dictionary<Type, TypeTreeNode>();
-    internal static void BuildTree(IEnumerable<Type> types)
+    private static readonly object _loadingLock = new object();
+    internal static void BuildTree(List<Type> types)
+    {
+        BuildTypeTree(types);
+    }
+
+    internal static void ResetTypeTree(List<Type> types)
+    {
+        // Rebuild the type tree. Lock in case multiple overlapping resets are called.
+        lock (_loadingLock)
+        {
+            _typeToNode = new Dictionary<Type, TypeTreeNode>();
+            BuildTypeTree(types);
+        }
+    }
+
+    private static void BuildTypeTree(List<Type> types)
     {
         // One time pass through types to create initial node list.
         foreach (var type in types)
